@@ -1,0 +1,44 @@
+scilla_version 0
+
+(***************************************************)
+
+import ListUtils
+
+library ListTest
+
+
+(****************For Final Version*******************************************)
+
+(* Library *)
+let f =
+  fun (a : (Pair(ByStr20)(Uint32))) =>
+   (* builtin sha256hash a*)
+   
+   match a with
+|Pair recAddress recAmount =>
+   let  msg  = {_tag : ""; _recipient : recAddress ; _amount : Uint128 1000000000000 } in
+   msg
+end 
+
+(*********************************************************************************)
+   
+ (*
+  a   <- listofMessage ;
+  b = let p = msg in
+    Cons {Message} p a ;
+  listofMessage := b 
+*)
+contract ListTest ()
+
+
+transition test (recipients : List( Pair (ByStr20)(Uint32)))
+accept;
+(* Contract transition *)
+(* Assume input is the list [ 1 ; 2 ; 3 ] *)
+(* Apply f to all values in input *)
+hash_list_int32 = @list_map (Pair(ByStr20)(Uint32)) Message;
+hashed_list = hash_list_int32 f recipients ;
+(* hashed_list is now [ sha256hash 1 ; sha256hash 2 ; sha256hash 3 ] *)
+
+ send hashed_list
+end

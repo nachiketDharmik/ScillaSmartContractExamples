@@ -1,0 +1,54 @@
+scilla_version 0 
+
+library SendMessage
+
+contract SendMessage(owner: ByStr20 )
+
+
+(*field listofMessage : List(Message)  = Nil {Message}*)
+
+(*---Experimenting 28/5/2021------*)
+
+(*field c : Option Message = None {Message}*) 
+
+(*field b: List(Message) = let c = Nil {Message} in 
+                       let recipient = 0x78eb69306AEf70d195D2eE6B84755A2234135d18 in
+                       let  msg  = {_tag : ""; _recipient : recipient; _amount : Uint128 1000000000000 } in
+                       
+                        Cons{Message} msg c           (*declaring variable b with fixed value*) *)
+
+(*field c : Map ByStr20 List(Message) = Emp ByStr20 List(Message) *)
+(**********************************)
+transition  addMessages(recipient : ByStr20 )
+  msg  = {_tag : ""; _recipient : recipient; _amount : Uint128 1000000000000 };
+ 
+ (* a   <- listofMessage ;
+  b = let p = msg in
+    Cons {Message} p a ;
+  listofMessage := b ; *)
+  
+  
+  
+  x = Nil {Message} ;
+  y = Cons {Message} msg x ;
+  z = Cons {Message} msg y ;
+  p = Cons {Message} msg z ;
+  q = Cons {Message} msg p ;
+  r = Cons {Message} msg q ;
+  s = Cons {Message} msg r ;
+  t = Cons {Message} msg s ;
+  u = Cons {Message} msg t ;
+  v = Cons {Message} msg u ; 
+  w = Cons {Message} msg v ;
+  send w
+  (*c[_sender] := y*)
+  
+    
+end
+
+
+transition sendtoAll()
+
+(*msg <- listofMessage ;
+send msg*)
+end

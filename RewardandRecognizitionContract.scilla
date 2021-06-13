@@ -1,0 +1,113 @@
+scilla_version 0 
+
+library Rewardcontract
+type UserSkills =
+  | UserSkills of String Uint32
+  
+let initialScore = Uint32 0
+let one = Uint32 1
+
+contract RewardContract(owner : ByStr20 , registrationAmount: Uint128)
+
+field registeredUsers : Map ByStr20 String = Emp  ByStr20 String                                 (*addrress - userName*)
+field userSkills : Map ByStr20 (Map Uint32 UserSkills) = Emp ByStr20 (Map Uint32 UserSkills)     (*address - skillID - skillName - score*)
+field badges : Map  Uint32 String = Emp Uint32 String                                            (*BadgeID - BadgeInfo*)
+field userBadges : Map ByStr20 (Map Uint32 Uint32) = Emp ByStr20 (Map Uint32 Uint32)             (*address - badgeID - Badgecount*)
+
+(*add Badge only owner can addd *)
+transition addBadge(badgeID : Uint32 , badgeInfo : String)
+isOwner = builtin eq owner _sender ;                                                            (*check if sender is owner of contract*)
+match isOwner with
+  | True => 
+    badges[badgeID] := badgeInfo ;
+    h = {_eventname : "Badge Added"; badgeName: badgeInfo};
+    event h
+  | False =>
+  end
+end
+
+(*Display all badges*)
+transition displayBadges()
+
+badgeMap <- badges ;
+badgeList = builtin to_list badgeMap ;                                                            (*Map to List*)
+i = {_eventname : "list of available Badges"; badgesList: badgeList};
+    event i
+end
+
+(*Register new user by paying registration fees*)
+transition RegisterUser(userName : String)
+accept;
+alreadyRegistered <-   exists registeredUsers[_sender] ;                                            (*Check if user already registered*)
+match alreadyRegistered with 
+|False =>
+  regFees =  builtin eq _amount registrationAmount ;                                                (*Check if correct registration amout is entered by user or not*)
+    match regFees with 
+         |False =>
+           e = { _exception : "Incorrect Regestration Fees . Please Enter Amount :" ; amount : registrationAmount };
+           throw e
+         |True =>
+           registeredUsers[_sender] := userName ;
+            f = {_eventname : "User Registered!!!"; message:"Welcome to InstaPat"};
+            event f
+    end
+|True => 
+  g = { _exception : "Already Registered !!!!" };
+  throw g
+end  
+end
+
+
+(*Add New user skill*)
+transition addSkill(skillID : Uint32 , skillName : String)
+
+isRegistered <-   exists registeredUsers[_sender] ;    
+match isRegistered with 
+|True =>
+  skillInfo = UserSkills skillName initialScore ;                                           (*TypeCast to UserSkills ADT*)
+  userSkills[_sender][skillID] := skillInfo;
+  f = {_eventname : "Skill Added"};
+  event f
+|False =>  
+  g = { _exception : "User not registered !! register First!!! "};
+  throw g
+end
+
+end
+
+(*appreciate colleague*)
+transition PraiseColleague(address : ByStr20 , badgeID :Uint32)
+accept ;
+
+isRegistered <-   exists registeredUsers[address] ;    
+match isRegistered with 
+|True =>
+  badgeScore <- userBadges[address][badgeID];
+  match badgeScore with 
+  |Some score =>
+    newScore = builtin add score one ;
+    userBadges[address][badgeID] := newScore                                          (*Increment the Badgecount score by one*)
+  |None =>
+     userBadges[address][badgeID] := one
+  end
+|False =>  
+  g = { _exception : "User not registered !! "};
+  throw g
+end
+
+end
+
+(*transition to view profile*)
+transition ViewProfile(address : ByStr20)
+isRegistered <-   exists registeredUsers[address] ;    
+match isRegistered with 
+|True =>
+   
+|False =>
+  g = { _exception : "Address not registered !! "};
+  throw g
+end
+end
+
+
+

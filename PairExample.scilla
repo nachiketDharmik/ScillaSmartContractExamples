@@ -1,0 +1,34 @@
+scilla_version 0
+contract Pairs()
+
+field a: Pair (String) (Uint32) =
+              let c= "Hello" in
+              let d = Uint32 5 in
+              Pair {(String) (Uint32)} c d                (*declaring variable a with no value*)
+
+field b: Pair (String) (Option Uint32) =
+              let e= "" in
+              let f = None {Uint32}  in
+              Pair {(String) (Option Uint32)} e f         (*declaring variable b with fixed value*)
+
+
+transition update_value()
+
+    h = let i = "Hello World" in 
+        let j = Uint32 6 in 
+        Pair {(String)(Uint32)} i j;  (*declaring variable h with fixed value in transition*)
+
+    (*Updating variable a*)
+    a:= h;
+    
+    (*Updating variable b*)
+    k = let l = "Hello again, World" in 
+        let m = Uint32 7 in
+        let n = Some {Uint32} m in 
+        Pair {(String)(Option Uint32)} l n;
+    b:= k  ;
+    
+     e= {_eventname : "List"; message: h};
+    event e
+        
+end
